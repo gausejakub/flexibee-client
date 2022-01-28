@@ -27,7 +27,7 @@ class ResponseHydrator extends ObjectPrototype
      * @return array<\EcomailFlexibee\Result\EvidenceResult>
      * @throws \EcomailFlexibee\Exception\EcomailFlexibeeRequestFail
      */
-    public function convertResponseToEvidenceResults(Response $response): array
+    public function convertResponseToEvidenceResults(Response $response, bool $withRowCount = false): array
     {
         $data = $response->getData();
         $hasErrors = isset($data[0], $data[0]['errors']);
@@ -57,7 +57,11 @@ class ResponseHydrator extends ObjectPrototype
             return [new EvidenceResult($data)];
         }
 
-        return array_map(static fn (array $data) => new EvidenceResult($data), $data[$this->config->getEvidence()]);
+        $data = array_map(static fn (array $data) => new EvidenceResult($data), $data[$this->config->getEvidence()]);
+        return $withRowCount ? [
+            'row_count' => $data['row_count'],
+            'data' => $data,
+        ] : $data;g
     }
 
     public function convertResponseToEvidenceResult(Response $response, bool $throwException): EvidenceResult
